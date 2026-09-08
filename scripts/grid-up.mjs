@@ -32,7 +32,7 @@ if (!Number.isInteger(nodeCount) || nodeCount < 1 || nodeCount > nodePorts.lengt
   process.exit(1);
 }
 
-const nodesToStart = nodeCount;
+const nodesToStart = 0;
 
 const c = {
   dim: (s) => `\x1b[2m${s}\x1b[0m`,

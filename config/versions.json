@@ -32,8 +32,7 @@
     "nodePorts": [
       5570,
       5571,
-      5572,
-      5573
+      5572
     ],
     "nodePortsNote": "Deliberately NOT Selenium's default 5555: that is also ADB's default port, so anyone with an Android emulator running would collide. Change these here if you hit a conflict; every script reads this file.",
     "maxSessionsPerNode": 1,
