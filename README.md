@@ -73,6 +73,10 @@ The four metrics we watch, with queries to copy straight into Prometheus, are
 in **[open-docs/METRICS.md](open-docs/METRICS.md)**. Have that page open during
 the session.
 
+How the pieces fit together — the single entry point, the queue manager and the
+three nodes — is drawn in
+**[open-docs/GRID-ARCHITECTURE.md](open-docs/GRID-ARCHITECTURE.md)**.
+
 **If anything gets weird:** `npm run stop && npm run doctor`. That is the reset
 button, and it clears the orphaned `chromedriver` processes that otherwise make
 the next run fail confusingly.
