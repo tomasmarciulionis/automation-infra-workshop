@@ -44,7 +44,7 @@ npm run doctor
 ```
 
 All green means you are ready. Anything else, read
-**[docs/PREREQUISITES.md](docs/PREREQUISITES.md)** — it has manual install
+**[open-docs/PREREQUISITES.md](open-docs/PREREQUISITES.md)** — it has manual install
 commands for every OS, corporate-laptop workarounds, and what to do when a
 check fails.
 
