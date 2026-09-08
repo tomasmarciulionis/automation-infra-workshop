@@ -1,0 +1,36 @@
+# Prometheus configuration for the workshop.
+#
+# Started by `npm run prometheus`, which points Prometheus at this file and
+# writes its TSDB to ./prometheus-data (gitignored).
+#
+# A 2s scrape interval is far too aggressive for production. We use it because
+# the workshop's interesting events - a queue filling up, a node dying - last
+# about fifteen seconds, and at the default 15s interval you would get one data
+# point and a flat line.
+
+global:
+  scrape_interval: 2s
+  scrape_timeout: 1s
+  evaluation_interval: 2s
+  external_labels:
+    environment: workshop
+
+scrape_configs:
+  # The Grid, via our GraphQL -> Prometheus exporter (tools/grid-exporter.mjs).
+  # Grid 4 has no native /metrics endpoint, hence the exporter.
+  # 127.0.0.1 rather than localhost on purpose: on a dual-stack machine
+  # "localhost" can resolve to [::1] first, and a scrape target that only
+  # listens on IPv4 then shows as down for no visible reason.
+  - job_name: selenium-grid
+    static_configs:
+      - targets: ['127.0.0.1:9615']
+        labels:
+          component: grid
+
+  # Prometheus scraping itself. Handy for showing attendees what a healthy
+  # target list looks like at http://localhost:9090/targets
+  - job_name: prometheus
+    static_configs:
+      - targets: ['127.0.0.1:9090']
+        labels:
+          component: prometheus

@@ -1,0 +1,23 @@
+# Downloaded tooling - recreated by `npm run setup`
+vendor/
+
+# Runtime state
+.run/
+logs/
+prometheus-data/
+
+# Test output
+test-results/
+playwright-report/
+blob-report/
+.last-run.json
+
+# Dependencies
+node_modules/
+
+# OS / editor noise
+.DS_Store
+Thumbs.db
+*.swp
+
+docs/

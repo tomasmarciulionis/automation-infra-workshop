@@ -1,0 +1,235 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Odeon Seats</title>
+    <style>
+      :root {
+        --free: #e5e7eb;
+        --yours: #16a34a;
+        --taken: #374151;
+      }
+      body {
+        font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+        margin: 0;
+        padding: 2rem 1rem;
+        color: #111827;
+        background: #f9fafb;
+      }
+      main { max-width: 34rem; margin: 0 auto; }
+      h1 { font-size: 1.4rem; margin: 0; }
+      h2 { font-size: 0.95rem; margin: 1.75rem 0 0.5rem; }
+      .meta { color: #6b7280; font-size: 0.9rem; margin: 0.25rem 0 1.5rem; }
+      .screen {
+        background: #d1d5db;
+        border-radius: 0 0 40% 40%;
+        text-align: center;
+        font-size: 0.7rem;
+        letter-spacing: 0.4em;
+        color: #4b5563;
+        padding: 0.3rem 0 0.9rem;
+      }
+      .seat-map {
+        display: grid;
+        grid-template-columns: repeat(10, 1fr);
+        gap: 6px;
+        margin: 1.25rem 0;
+      }
+      .seat {
+        aspect-ratio: 1;
+        border: 0;
+        border-radius: 5px;
+        font: inherit;
+        font-size: 0.7rem;
+        cursor: pointer;
+        background: var(--free);
+        color: #4b5563;
+      }
+      .seat[data-state="yours"] { background: var(--yours); color: #fff; }
+      .seat[data-state="taken"] { background: var(--taken); color: #9ca3af; cursor: not-allowed; }
+      .status { background: #fff; border: 1px solid #e5e7eb; border-radius: 6px; padding: 0.7rem 0.9rem; }
+      .legend { display: flex; gap: 1rem; font-size: 0.8rem; color: #6b7280; }
+      .legend span::before {
+        content: "";
+        display: inline-block;
+        width: 0.7rem;
+        height: 0.7rem;
+        border-radius: 3px;
+        margin-right: 0.35rem;
+        vertical-align: -1px;
+      }
+      .legend .is-free::before { background: var(--free); }
+      .legend .is-yours::before { background: var(--yours); }
+      .legend .is-taken::before { background: var(--taken); }
+      ol { padding-left: 1.2rem; margin: 0; color: #4b5563; font-size: 0.9rem; }
+      button.party { font: inherit; margin-top: 1rem; padding: 0.5rem 0.9rem; border-radius: 6px; border: 1px solid #d1d5db; background: #fff; cursor: pointer; }
+    </style>
+  </head>
+  <body>
+    <main>
+      <h1 data-testid="screening-title">&nbsp;</h1>
+      <p class="meta">
+        <time data-testid="showtime">&ndash;</time> &middot;
+        <span data-testid="ticket-price">&ndash;</span> a ticket
+      </p>
+      <p class="meta">
+        <span data-testid="free-count">&ndash;</span> of
+        <span data-testid="seat-count">&ndash;</span> seats free &middot; booking as
+        <strong data-testid="who">&ndash;</strong>
+      </p>
+
+      <div class="screen">SCREEN</div>
+      <div class="seat-map" data-testid="seat-map"></div>
+
+      <p class="legend">
+        <span class="is-free">Free</span>
+        <span class="is-yours">Yours</span>
+        <span class="is-taken">Taken</span>
+      </p>
+
+      <p class="status" data-testid="status">Pick a seat.</p>
+      <button class="party" data-testid="book-party">Book a party of three</button>
+
+      <h2>Recent bookings</h2>
+      <ol data-testid="recent-bookings"></ol>
+    </main>
+
+    <script>
+      // No login. Who you are comes from the URL, and which screening you are
+      // looking at comes from the URL too, so a test can work on a screening
+      // of its own without anything else changing.
+      const params = new URLSearchParams(location.search);
+      const who = params.get('who') || 'guest';
+      const screeningId = params.get('screening') || 's1';
+
+      const find = (testid) => document.querySelector(`[data-testid="${testid}"]`);
+      const seatMap = find('seat-map');
+      const recent = find('recent-bookings');
+
+      const setStatus = (text) => {
+        find('status').textContent = text;
+      };
+
+      async function api(path, options) {
+        const res = await fetch(path, options);
+        return { status: res.status, body: await res.json() };
+      }
+
+      const stateOf = (seat) => (seat.who === null ? 'free' : seat.who === who ? 'yours' : 'taken');
+
+      function drawSeats(seats) {
+        seatMap.replaceChildren(
+          ...seats.map((seat) => {
+            const button = document.createElement('button');
+            button.className = 'seat';
+            button.textContent = seat.seat;
+            button.dataset.testid = `seat-${seat.seat}`;
+            button.dataset.seat = seat.seat;
+            // The state is an attribute rather than only a colour, so a test
+            // never has to know what the stylesheet is doing.
+            button.dataset.state = stateOf(seat);
+            if (seat.who !== null) {
+              button.dataset.who = seat.who;
+            }
+            button.title = seat.who === null ? `Seat ${seat.seat} is free` : `Seat ${seat.seat}: ${seat.who}`;
+            return button;
+          }),
+        );
+      }
+
+      function drawShowtime(startsAt, priceEur) {
+        const showtime = find('showtime');
+        // Formatted for whoever happens to be looking at the page.
+        showtime.textContent = new Date(startsAt).toLocaleString();
+        showtime.dateTime = startsAt;
+
+        const price = find('ticket-price');
+        price.textContent = new Intl.NumberFormat(undefined, {
+          style: 'currency',
+          currency: 'EUR',
+        }).format(priceEur);
+
+        // The same two facts, for anything that wants the value rather than
+        // the text: analytics, exports, and anybody comparing two screenings.
+        showtime.dataset.iso = startsAt;
+        price.dataset.amount = priceEur.toFixed(2);
+        price.dataset.currency = 'EUR';
+      }
+
+      function drawBookings(bookings) {
+        recent.replaceChildren(
+          ...bookings.map((booking, index) => {
+            const item = document.createElement('li');
+            item.textContent = `Seat ${booking.seat} — ${booking.who}`;
+            item.dataset.seat = booking.seat;
+            item.dataset.who = booking.who;
+            if (index === 0) {
+              item.dataset.testid = 'latest-booking';
+            }
+            return item;
+          }),
+        );
+      }
+
+      async function render() {
+        const { status, body } = await api(`/api/screenings/${screeningId}`);
+        if (status !== 200) {
+          setStatus(`There is no screening called ${screeningId}.`);
+          return;
+        }
+
+        find('screening-title').textContent = body.film;
+        drawShowtime(body.startsAt, body.priceEur);
+        find('free-count').textContent = body.freeCount;
+        find('seat-count').textContent = body.seatCount;
+        find('who').textContent = who;
+        drawSeats(body.seats);
+
+        const { body: history } = await api(`/api/screenings/${screeningId}/bookings`);
+        drawBookings(history.bookings);
+      }
+
+      seatMap.addEventListener('click', async (event) => {
+        const button = event.target.closest('button[data-seat]');
+        if (!button) {
+          return;
+        }
+        const seat = Number(button.dataset.seat);
+        const { status, body } = await api(
+          `/api/screenings/${screeningId}/seats/${seat}?who=${encodeURIComponent(who)}`,
+          { method: 'POST' },
+        );
+
+        if (status === 201) {
+          setStatus(`Seat ${seat} is yours.`);
+        } else if (status === 409) {
+          setStatus(`Seat ${seat} was already taken by ${body.who}.`);
+        } else {
+          setStatus(body.error ?? 'Something went wrong.');
+        }
+        await render();
+      });
+
+      find('book-party').addEventListener('click', async () => {
+        const { status, body } = await api(
+          `/api/screenings/${screeningId}/seats?who=${encodeURIComponent(who)}`,
+          {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ count: 3 }),
+          },
+        );
+
+        if (status === 201) {
+          setStatus(`Seats ${body.seats.map((s) => s.seat).join(', ')} are yours.`);
+        } else {
+          setStatus(body.error ?? 'Something went wrong.');
+        }
+        await render();
+      });
+
+      render();
+    </script>
+  </body>
+</html>

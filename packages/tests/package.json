@@ -1,0 +1,31 @@
+{
+  "name": "@workshop/tests",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Playwright suite for the workshop, run locally or through Selenium Grid. Talks to @workshop/app over HTTP only.",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "test:local": "playwright test --project=local --workers=1 --grep-invert \"@set3|@set4\"",
+    "test:grid:serial": "cross-env SELENIUM_REMOTE_URL=http://localhost:4444 playwright test --project=grid --workers=1",
+    "test:grid": "cross-env SELENIUM_REMOTE_URL=http://localhost:4444 playwright test --project=grid --workers=6",
+    "test:set1": "cross-env SELENIUM_REMOTE_URL=http://localhost:4444 playwright test --project=grid --grep @set1 --workers=6",
+    "test:set1:serial": "cross-env SELENIUM_REMOTE_URL=http://localhost:4444 playwright test --project=grid --grep @set1 --workers=1",
+    "test:set2": "cross-env SELENIUM_REMOTE_URL=http://localhost:4444 playwright test --project=grid --grep @set2 --workers=6",
+    "test:set2:serial": "cross-env SELENIUM_REMOTE_URL=http://localhost:4444 playwright test --project=grid --grep @set2 --workers=1",
+    "test:set3": "cross-env SELENIUM_REMOTE_URL=http://localhost:4444 playwright test --project=grid --grep @set3 --workers=6",
+    "test:set3:serial": "cross-env SELENIUM_REMOTE_URL=http://localhost:4444 playwright test --project=grid --grep @set3 --workers=1",
+    "test:set4": "cross-env SELENIUM_REMOTE_URL=http://localhost:4444 playwright test --project=grid --grep @set4 --workers=6",
+    "test:set4:serial": "cross-env SELENIUM_REMOTE_URL=http://localhost:4444 playwright test --project=grid --grep @set4 --workers=1",
+    "test:report": "playwright show-report"
+  },
+  "devDependencies": {
+    "@playwright/test": "1.62.1",
+    "@types/node": "^24.10.1",
+    "cross-env": "^10.1.0",
+    "typescript": "^5.9.3"
+  }
+}

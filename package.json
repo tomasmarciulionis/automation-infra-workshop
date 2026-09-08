@@ -1,0 +1,49 @@
+{
+  "name": "grid-workshop",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Distributed test execution workshop: Playwright over Selenium Grid 4, with Prometheus observability and a suite of planted failures.",
+  "workspaces": [
+    "packages/*"
+  ],
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "setup": "node scripts/setup.mjs",
+    "doctor": "node scripts/doctor.mjs",
+    "stop": "node scripts/stop-all.mjs",
+
+    "app": "npm start --workspace @workshop/app",
+
+    "grid:up": "node scripts/grid-up.mjs",
+    "grid:down": "node scripts/stop-all.mjs --grid-only",
+    "grid:status": "node scripts/grid-status.mjs",
+    "node:kill": "node scripts/kill-node.mjs",
+    "node:drain": "node scripts/drain-node.mjs",
+
+    "exporter": "node tools/grid-exporter.mjs",
+    "prometheus": "node scripts/prometheus-up.mjs",
+
+    "up": "node scripts/up.mjs",
+
+    "typecheck": "npm run typecheck --workspace @workshop/tests",
+    "test:unit": "node --test scripts/lib/*.test.mjs",
+    "test:app": "npm test --workspace @workshop/app",
+    "test:local": "npm run test:local --workspace @workshop/tests",
+    "test:grid:serial": "npm run test:grid:serial --workspace @workshop/tests",
+    "test:grid": "npm run test:grid --workspace @workshop/tests",
+
+    "test:set1": "npm run test:set1 --workspace @workshop/tests",
+    "test:set1:serial": "npm run test:set1:serial --workspace @workshop/tests",
+    "test:set2": "npm run test:set2 --workspace @workshop/tests",
+    "test:set2:serial": "npm run test:set2:serial --workspace @workshop/tests",
+    "test:set3": "npm run test:set3 --workspace @workshop/tests",
+    "test:set3:serial": "npm run test:set3:serial --workspace @workshop/tests",
+    "test:set4": "npm run test:set4 --workspace @workshop/tests",
+    "test:set4:serial": "npm run test:set4:serial --workspace @workshop/tests",
+
+    "test:report": "npm run test:report --workspace @workshop/tests"
+  }
+}

@@ -1,0 +1,45 @@
+{
+  "_comment": "Single source of truth for every pinned version in this workshop. scripts/setup.mjs and scripts/doctor.mjs both read this file. Change a version here and nowhere else.",
+  "selenium": {
+    "version": "4.48.0",
+    "jar": "selenium-server-4.48.0.jar",
+    "url": "https://github.com/SeleniumHQ/selenium/releases/download/selenium-4.48.0/selenium-server-4.48.0.jar",
+    "notes": "Grid 4.48.0, released 2026-08-27. Requires Java 11+."
+  },
+  "prometheus": {
+    "version": "3.14.0",
+    "urlTemplate": "https://github.com/prometheus/prometheus/releases/download/v{version}/prometheus-{version}.{os}-{arch}.{ext}",
+    "notes": "Downloaded as a self-contained archive into vendor/ so we do not depend on brew/choco/apt packaging differences."
+  },
+  "java": {
+    "recommended": "17",
+    "minimumMajor": 11,
+    "notes": "Java is required only because the Selenium Grid hub and nodes are Java processes. Selenium dropped Java 8 in 2023; 11 is the floor, 17 LTS is what we test against."
+  },
+  "node": {
+    "recommended": "22",
+    "minimumMajor": 20,
+    "notes": "Node 20 is the floor because the scripts use fetch, node:test-free ESM and stable fs/promises APIs. 22 LTS recommended."
+  },
+  "playwright": {
+    "version": "1.62.1",
+    "notes": "Pinned in package.json. Playwright's Selenium Grid support is experimental and Chromium/Chrome-only - see docs/SETUP.md#the-playwright--grid-caveat."
+  },
+  "grid": {
+    "hubPort": 4444,
+    "eventPublishPort": 4442,
+    "eventSubscribePort": 4443,
+    "nodePorts": [
+      5570,
+      5571,
+      5572,
+      5573
+    ],
+    "nodePortsNote": "Deliberately NOT Selenium's default 5555: that is also ADB's default port, so anyone with an Android emulator running would collide. Change these here if you hit a conflict; every script reads this file.",
+    "maxSessionsPerNode": 1,
+    "exporterPort": 9615,
+    "prometheusPort": 9090,
+    "appPort": 3000,
+    "notes": "3 nodes x 1 session = 3 slots. Tests run with 6 workers so queuing is guaranteed by arithmetic, not by CPU contention."
+  }
+}
