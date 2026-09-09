@@ -6,7 +6,7 @@
 #
 # Safe to re-run: every step is skipped if already satisfied.
 
-$ErrorActionPreference = 'Stop'
+$ErrorActionPreference = 'Continue'
 
 $JavaPackage = 'Microsoft.OpenJDK.17'
 $NodePackage = 'OpenJS.NodeJS.LTS'
